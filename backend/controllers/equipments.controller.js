@@ -28,43 +28,65 @@ export default class EquipmentController {
     }
   }
 
-  static async addEquipment(user, review, date) {
+  static async apiPostEquipment(req, res, next) {
     try {
-      const reviewDoc = {
-        name: equipment,
-        user_name: user.name,
-        user_id: user._id,
-        date: date,
+      const equipmentId = req.body.equipment_id;
+      const equipment = req.body.name;
+      userInfo = {
+        user_name: req.body.user_name,
+        _id: req.body.user_id,
       };
-      return await equipment.insertOne(reviewDoc);
-    } catch (err) {
-      console.error(`Unable to post review: ${err}`);
-      return { error: err };
-    }
-  }
-
-  static async updateEquipment(equipmentId, userId, name, date) {
-    try {
-      const updateResponse = await equipment.updateOne(
-        { user_id: userId, _id: ObjectId(equipmentId) },
-        { $set: { name: name, date: date } }
+      const date = new Date();
+      const EquipmentResponse = await EquipmentDAO.addEquipment(
+        userInfo,
+        equipment,
+        date
       );
-      return updateResponse;
+      res.json({ Status: "success" });
     } catch (err) {
-      console.error(`Unable to update equipment: ${err}`);
+      res.status(500).json({ error: err.message });
     }
   }
 
-  static async deleteEquipment(equipmentId, userId) {
+  static async apiUpdateEquipment(req, res, next) {
     try {
-      const deleteResponse = await equipment.deleteOne({
-        _id: ObjectId(equipmentId),
-        user_id: userId,
-      });
-      return deleteResponse;
+      const equipmentId = req.body.equipment_id;
+      const name = req.body.name;
+      const date = new Date();
+
+      const equipmentResponse = await EquipmentDAO.updateEquipment(
+        equipmentId,
+        name,
+        date
+      );
+
+      var { error } = equipmentResponse;
+      if (error) {
+        res.status(400).json({ error });
+      }
+
+      if (equipmentResponse.modifiedCount === 0) {
+        throw new Error("unable to update equipment");
+      }
+
+      res.json({ status: "success" });
     } catch (err) {
-      console.error(`Unable to delete equipment: ${err}`);
-      return { error: err };
+      res.status(500).json({ error: err.message });
+    }
+  }
+
+  static async apiDeleteEquipment(req, res, next) {
+    try {
+      const equipmentId = req.query.id;
+      const userId = req.body.user_id;
+      console.log(equipmentId);
+      const equipmentResponse = await EquipmentDAO.deleteEquipment(
+        equipmentId,
+        userId
+      );
+      res.json({ status: "success" });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
     }
   }
 }

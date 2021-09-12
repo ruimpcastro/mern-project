@@ -58,4 +58,44 @@ export default class EquipmentDAO {
       throw err;
     }
   }
+
+  static async addEquipment(user, equipment, date) {
+    try {
+      const reviewDoc = {
+        name: equipment,
+        user_name: user.name,
+        user_id: user._id,
+        date: date,
+      };
+      return await equipment.insertOne(reviewDoc);
+    } catch (err) {
+      console.error(`Unable to post review: ${err}`);
+      return { error: err };
+    }
+  }
+
+  static async updateEquipment(equipmentId, userId, name, date) {
+    try {
+      const updateResponse = await equipment.updateOne(
+        { user_id: userId, _id: ObjectId(equipmentId) },
+        { $set: { name: name, date: date } }
+      );
+      return updateResponse;
+    } catch (err) {
+      console.error(`Unable to update equipment: ${err}`);
+    }
+  }
+
+  static async deleteEquipment(equipmentId, userId) {
+    try {
+      const deleteResponse = await equipment.deleteOne({
+        _id: ObjectId(equipmentId),
+        user_id: userId,
+      });
+      return deleteResponse;
+    } catch (err) {
+      console.error(`Unable to delete equipment: ${err}`);
+      return { error: err };
+    }
+  }
 }
